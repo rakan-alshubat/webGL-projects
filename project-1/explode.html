@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>E X P L O D E !</title>
+
+
+<!-- Vertex Shader -->
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+// This is GLSL code (not HTML5)
+
+attribute vec4 vPosition;
+
+//HW470: uniforms to control explosion and color change
+//uniform
+//explosion factor
+uniform float explosion; 
+
+//incoming color attribute and varying for fragment shader
+attribute vec3 vColor;
+varying vec4 color;
+
+void
+main()
+{
+	// HW470: explode the geometry x,y coords and set z and w
+	// Change the code below.
+	//original position + original position * scaler
+	gl_Position.x = vPosition.x + (vPosition.x * explosion);
+	gl_Position.y = vPosition.y + (vPosition.y * explosion);
+    	gl_Position.z = 0.0;
+    	gl_Position.w = 1.0;
+	
+	//HW470: create a parameter to vary the color based on the explodeFactor
+	//equation that would make sure the three colors scaled together to 1.0
+	float rFade = ( 1.0 - vColor.r ) * explosion / 0.5;
+	float gFade = ( 1.0 - vColor.g ) * explosion / 0.5;
+	float bFade = ( 1.0 - vColor.b ) * explosion / 0.5;
+	
+	//HW470: Modify color with factor and clip to max valid value
+	//adding to the original rgb value the fade factor  
+	float red = vColor.r + rFade;
+	
+	float green = vColor.g + gFade;
+	
+	float blue = vColor.b + bFade;
+
+
+
+    //set the varying color for the fragment shader 
+    color = vec4(red, green, blue, 1.0);
+}
+</script>
+
+<!-- Fragment Shader -->
+<!-- (no change to this) -->
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+// This is GLSL code (not HTML5)
+
+precision mediump float;
+
+// Color coming in
+varying vec4 color;
+
+
+void
+main()
+{
+   //pass color to fragment shader
+    gl_FragColor = color;
+}
+</script>
+
+<!-- JS Utility codes and codes for this program -->
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="explode.js"></script>
+</head>   
+
+<body>
+<!--HW470: Add text to communicate what program does -->
+<div style="font-family:verdana";>
+<h1> CSE 470 HW#1: Explode!</h1>
+
+<strong>Author: </strong> Rakan Alshubat
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp        
+<strong>Date: </strong>January 2019</br>
+
+</br>
+<strong>Description: </strong></br>This program has an octagon made out of eight triangles. All eight triangles have the same RGB values,
+</br>
+and each triangle has a smaller triangle facing the opposite direction and moving outward slowly and fading to white.
+</br>
+</br>
+<strong>How did you map color from the initial (r,g,b) to white?</strong></br>
+I multiplied the remainder of the RGB value(total value of 1.0 - current value) with the current exploding value, then divided that by
+</br>
+the maximum exploding factor of 0.5 to get the amount that needs to be added to the initial RGB value and added it.
+</br>
+(1 - current value) * current exploding value / max exploding value
+</br>
+</br>
+<strong>Resources: </strong>Prof. Angel's codes.</br>
+</br>
+</div>
+
+<canvas id="gl-canvas" width="512" height="512" style="border:2px solid #000000;">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+</body>
+</html>
