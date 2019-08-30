@@ -1,0 +1,166 @@
+
+<!-- Rakan Alshubat -->
+
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec3 vPosition;
+attribute vec3 vNormal;
+
+varying vec4 fColor;
+
+
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform float shininess;
+
+
+void
+main()
+{
+	vec4 pos4D = vec4(vPosition, 1.0);
+	vec4 nor4D = vec4(vNormal, 0.0);
+
+      //compute lighting in eye coordinates
+    vec3 pos = (modelViewMatrix * pos4D).xyz;
+    vec3 light = lightPosition.xyz;
+    vec3 L = normalize( light - pos );
+
+	// eye coordinates assumes eye at origin
+	vec3 eyePoint = vec3(0.0, 0.0, 0.0);
+	vec3 E = normalize( eyePoint - pos );
+
+    // halfway vector
+    vec3 H = normalize( L + E );
+
+    // Transform vertex normal into eye coordinates
+    vec3 N = normalize( (modelViewMatrix*nor4D).xyz);
+
+    // Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;
+
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;
+
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;
+
+    if( dot(L, N) < 0.0 ) {
+	specular = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+
+    gl_Position = projectionMatrix * modelViewMatrix * pos4D;
+
+
+    fColor = ambient + diffuse +specular;
+
+
+
+    fColor.a = 1.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+
+void
+main()
+{
+
+    gl_FragColor = fColor;
+
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="Alshubat_hw3.js"></script>
+<script type="text/javascript" src="Alshubat_geometry.js"></script>
+
+
+
+<body style="font-family:verdana;">
+
+<canvas id="gl-canvas" width="512" height="512" style="border: 1px solid; background-color: #505050">
+	Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+<div>
+
+	Use your mouse by clicking on the canvas and dragging to rotate the object!
+
+	<br/>
+	<br/>
+
+	Choose between two different shapes:
+	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+	<button id="cylinder";> Cylinder </button>
+	<button id="vase";> Vase </button>
+
+
+	<br/><br/>
+
+	Choose between three different materials:
+	&nbsp&nbsp
+	<button id="pearl";> Pearl </button>
+	<button id="chrome";> Chrome </button>
+	<button id="gold";> Gold </button>
+
+
+	<br/><br/>
+
+	Choose the lights movement:
+	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+	<button id="fixed";> Fixed Light Position </button>
+	<button id="rotating";> Rotating Light Position </button>
+
+
+	<br/><br/>
+
+
+	Field Of View 10 <input type="range" min="10" max="100" value="60" id="fov"> 100
+
+	<br/><br/>
+
+</div>
+
+
+<hr/>
+
+
+<div>
+	<strong>Author: </strong> Rakan Alshubat
+	<br/>
+	<strong>Date: </strong> April 2019
+	<br/><br/>
+	<strong>Description: </strong>
+	<br/>
+	This program display an object created by a line, rotated about an axis to create a 3D object.<br/>
+	The cylinder has a straight line, and the vase has a curved line. You can use the buttons to view each object.<br/>
+The different shapes aren't set up yet. <br/>
+	This program also features three different materials using ambient, diffuse, and specular values along with shininess.<br/>
+	You can choose the material you want using the buttons as well.<br/>
+	The program allows you to rotate the object using the mouse by clicking and dragging on the canvas. The field of view can also be adjusted using the slider.<br/>
+	Finally, this program has a light to illuminate the object. The light can have a fixed position or it can rotate around the object. Use the buttons to explore those features.
+	<br/><br/>
+	<strong>Resources: </strong> Prof. Angel's codes.
+
+</div>
+
+
+
+
+
+</body>
+</html>
+
+
