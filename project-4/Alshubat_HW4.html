@@ -1,0 +1,157 @@
+
+<!-- Name: Rakan AlShubat -->
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+attribute  vec2 vTexCoord;
+
+uniform vec4 color;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
+
+uniform vec4 lightPosition;
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform float shininess;
+
+varying vec4 fColor;
+varying vec2 fTexCoord;
+
+uniform vec3 theta;
+
+void main() 
+{ 
+    fTexCoord = vTexCoord;
+
+    vec4 pos4D = vPosition;
+	vec4 nor4D = vec4(0.1, 0.1, 0.1, 0.0);
+
+      //compute lighting in eye coordinates
+    vec3 pos = (modelViewMatrix * pos4D).xyz;
+    vec3 light = lightPosition.xyz;
+    vec3 L = normalize( light - pos );
+
+	// eye coordinates assumes eye at origin
+	vec3 eyePoint = vec3(0.0, 0.0, 0.0);
+	vec3 E = normalize( eyePoint - pos );
+
+    // halfway vector
+    vec3 H = normalize( L + E );
+
+    // Transform vertex normal into eye coordinates
+    vec3 N = (normalize( (modelViewMatrix*nor4D).xyz));
+
+    // Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;
+
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;
+
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;
+
+    if( dot(L, N) < 0.0 ) {
+	specular = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+
+
+    fColor = ambient + diffuse + specular;
+
+
+
+    fColor.a = 1.0;
+} 
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+varying  vec2 fTexCoord;
+
+uniform int mode;
+uniform sampler2D texture;
+
+void
+main()
+{
+	if (mode == 1){
+        //solid colors
+        //gl_FragColor = fColor;
+
+    gl_FragColor = fColor * texture2D( texture, fTexCoord );
+    }
+    if (mode == 2){
+    gl_FragColor = texture2D( texture, fTexCoord );
+    }
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="Alshubat_HW4.js"></script>
+
+
+<body>
+<canvas id="gl-canvas" width="512" height="512" style="border: 1px solid">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+<div>
+	Toggle Animation:
+	&nbsp&nbsp&nbsp
+	<button id="toggle";> ON/OFF </button>
+
+</div>
+
+
+<hr/>
+Music:
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+<audio controls>
+    <source src="GOT_8bit_theme.mp3" type="audio/mpeg">
+    your browser doesn't support audio
+</audio>
+<br/>
+Sound Effect:
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+<audio controls autoplay loop>
+    <source src="sf_flying.mp3" type="audio/mpeg">
+    your browser doesn't support audio
+</audio>
+<hr/>
+
+
+<div>
+	<strong>Author: </strong> Rakan Alshubat
+	<br/>
+	<strong>Date: </strong> April 2019
+	<br/><br/>
+	<strong>Description: </strong>
+	<br/>
+    This program display my Avatar. I created a dragon that flaps its wings to fly around.<br/>
+    A ground is set, and a texture is applied to both the ground and the dragon. <br/>
+    However, i change the color of the texture on the dragon to differentiate it fromt he ground, and make it look like scales.<br/>
+    Phong illumination model isnt working perfectly, but it's there :) coming in from the top left.
+    <br/><br/>
+    <strong>Extra Credit: </strong>
+	<br/>
+    Two audio files have been added.<br/>
+    One music track, and one sound effect of flapping wings.<br/>
+    The sound effect autoplays and loops, the music doesnt.
+	<br/><br/>
+	<strong>Resources: </strong> Prof. Angel's codes.
+
+</div>
+
+</body>
+</html>
